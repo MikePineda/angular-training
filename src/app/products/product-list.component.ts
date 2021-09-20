@@ -1,21 +1,25 @@
-import { Component, OnInit} from "@angular/core";
-import productsJson from '../../api/products/products.json';
+import { Component, OnDestroy, OnInit} from "@angular/core";
+import { Subscription } from "rxjs";
 import { IProduct } from "./product";
+import { ProductService } from "./product.service";
 
 @Component({
-  selector: 'pm-products',
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
 
-export class ProductListComponent implements OnInit{
+export class ProductListComponent implements OnInit, OnDestroy{
+
+  constructor(private productService: ProductService){}
+
+  products: IProduct[] = [];
   pageTitle: string = 'Product List';
   imageWidth: number = 50;
   imageMargin: number = 2;
 
-  errorMessage = false;
+  errorMessage = '';
+  sub!: Subscription;
   showImage:boolean = false;
-  products: IProduct[] = productsJson;
   filteredProducts:IProduct[] = [];
 
   private _listFilter: string = '';
@@ -38,7 +42,22 @@ export class ProductListComponent implements OnInit{
 
   ngOnInit(): void {
     console.log("oninit");
-    this.filteredProducts = this.products;
+    this.sub = this.productService.getProducts().subscribe({
+      next: products => {
+        this.products = products;
+        this.filteredProducts = this.products;
+      },
+      error: error => this.errorMessage,
+
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
+
+  onRatingClicked(message: string): void{
+    this.pageTitle = message;
   }
 
 }
