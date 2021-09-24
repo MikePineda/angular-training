@@ -21,6 +21,13 @@ export class ProductService{
     );
   }
 
+  getProductById() : Observable<IProduct> {
+    return this.http.get<IProduct>(this.productUrl).pipe(
+      tap(data => console.log('All', JSON.stringify(data))),
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(err: HttpErrorResponse){
     let errorMessage = '';
     if(err.error instanceof ErrorEvent){
